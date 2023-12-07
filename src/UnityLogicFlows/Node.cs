@@ -13,6 +13,7 @@ namespace LogicFlows
 
         public LogicFlowNode inputAt(int i)
         {
+            if (!(inputs.Length > i)) return null;
             if (inputs[i].HasValue)
             {
                 LogicFlowNode n = parentGraph.getNodeAt(inputs[i].Value);
