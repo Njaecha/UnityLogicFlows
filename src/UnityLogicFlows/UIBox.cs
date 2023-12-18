@@ -8,7 +8,7 @@ namespace LogicFlows
         private Rect? _rect;
         public Rect rect
         {
-            get => checkRect();
+            get => getRect();
             internal set => _rect = value;
         }
         // B C
@@ -31,7 +31,7 @@ namespace LogicFlows
         /// </summary>
         /// <returns>The inital size and position of the node</returns>
         protected abstract Rect initRect();
-        private Rect checkRect()
+        private Rect getRect()
         {
             if (_rect == null) _rect = initRect();
             return new Rect(_rect.Value.position * LogicFlows.UIScale, _rect.Value.size * LogicFlows.UIScale);
