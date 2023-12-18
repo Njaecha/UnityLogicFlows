@@ -13,10 +13,10 @@ namespace LogicFlows
         }
         // B C
         // A D
-        internal Vector2 A { get => rect.position; }
-        internal Vector2 B { get => new Vector2(rect.position.x, rect.position.y + rect.height); }
-        internal Vector2 C { get => rect.position + rect.size; }
-        internal Vector2 D { get => new Vector2(rect.position.x + rect.width, rect.position.y); }
+        internal Vector2 A { get => rect.position * LogicFlows.UIScale; }
+        internal Vector2 B { get => new Vector2(rect.position.x, rect.position.y + rect.height) * LogicFlows.UIScale; }
+        internal Vector2 C { get => (rect.position + rect.size) * LogicFlows.UIScale; }
+        internal Vector2 D { get => new Vector2(rect.position.x + rect.width, rect.position.y) * LogicFlows.UIScale; }
 
         // mouse stuff
         protected Vector2? delta;
@@ -34,7 +34,7 @@ namespace LogicFlows
         private Rect checkRect()
         {
             if (_rect == null) _rect = initRect();
-            return _rect.Value;
+            return new Rect(_rect.Value.position * LogicFlows.UIScale, _rect.Value.size * LogicFlows.UIScale);
         }
 
         // helper methods 

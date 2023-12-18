@@ -6,7 +6,7 @@ namespace LogicFlows
 {
     public class LogicFlows : MonoBehaviour
     {
-        public static bool SmallUI { get => Screen.height <= 1440 ? true : false; }
+        public static float UIScale { get => 2160 / Screen.height; }
 
         public const string version = "0.0.1";
 

@@ -118,8 +118,8 @@ namespace LogicFlows
         /// </summary>
         public void update()
         {
-            Rect headerRect = new Rect(B.x, B.y + (LogicFlows.SmallUI ? 5 : 10), rect.width, LogicFlows.SmallUI ? 13 : 25);
-            Rect eatInputArea = new Rect(A.x - (LogicFlows.SmallUI ? 5 : 10), A.y - (LogicFlows.SmallUI ? 5 : 10), rect.width + (LogicFlows.SmallUI ? 10 : 20), rect.height + (LogicFlows.SmallUI ? 25 : 50));
+            Rect headerRect = new Rect(B.x, B.y + (LogicFlows.UIScale * 10), rect.width, LogicFlows.UIScale * 25);
+            Rect eatInputArea = new Rect(A.x - (LogicFlows.UIScale * 10), A.y - (LogicFlows.UIScale * 10), rect.width + (LogicFlows.UIScale * 20), rect.height + (LogicFlows.UIScale * 50));
 
             bool mouseOverHeader = headerRect.Contains(Input.mousePosition);
             mouseOver = rect.Contains(Input.mousePosition);
@@ -258,10 +258,10 @@ namespace LogicFlows
             // draw header
             GL.Begin(GL.QUADS);
             GL.Color(headerColor);
-            GL.Vertex(translateToGL(B + new Vector2(0, 10) * (LogicFlows.SmallUI ? 0.5f : 1f)));
-            GL.Vertex(translateToGL(B + new Vector2(0, 35) * (LogicFlows.SmallUI ? 0.5f : 1f)));
-            GL.Vertex(translateToGL(C + new Vector2(0, 35) * (LogicFlows.SmallUI ? 0.5f : 1f)));
-            GL.Vertex(translateToGL(C + new Vector2(0, 10) * (LogicFlows.SmallUI ? 0.5f : 1f)));
+            GL.Vertex(translateToGL(B + new Vector2(0, 10) * LogicFlows.UIScale));
+            GL.Vertex(translateToGL(B + new Vector2(0, 35) * LogicFlows.UIScale));
+            GL.Vertex(translateToGL(C + new Vector2(0, 35) * LogicFlows.UIScale));
+            GL.Vertex(translateToGL(C + new Vector2(0, 10) * LogicFlows.UIScale));
             GL.End();
 
             // draw background
@@ -316,7 +316,7 @@ namespace LogicFlows
 
         protected override Rect initRect()
         {
-            return new Rect(new Vector2(10,10), new Vector2(600,300) * (LogicFlows.SmallUI ? 0.5f : 1f));
+            return new Rect(new Vector2(10,10), new Vector2(600,300) * LogicFlows.UIScale);
         }
     }
 }
