@@ -24,6 +24,7 @@ namespace LogicFlows
 
         protected override Rect initRect()
         {
+            if (LogicFlows.SmallUI) return new Rect(25, 25, 30, 20);
             return new Rect(50, 50, 60, 40);
         }
 

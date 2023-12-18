@@ -41,25 +41,25 @@ namespace LogicFlows
         // translate screen coordinates to GL coordinates
         protected static Vector3 translate(Vector3 s)
         {
-            return translate((Vector2)s);
+            return translateToGL((Vector2)s);
         }
 
-        protected static Vector3 translate(Vector2 screenCoord)
+        protected static Vector3 translateToGL(Vector2 screenCoord)
         {
-            return new Vector3(translateX(screenCoord.x), translateY(screenCoord.y), 0);
+            return new Vector3(translateXToGL(screenCoord.x), translateYToGL(screenCoord.y), 0);
         }
 
-        protected static float translateX(float screenX)
+        protected static float translateXToGL(float screenX)
         {
             return screenX / Screen.width;
         }
 
-        protected static float translateY(float screenY)
+        protected static float translateYToGL(float screenY)
         {
             return screenY / Screen.height;
         }
 
-        protected void drawLineWithWidth(Vector3 start, Vector3 end, float lineWidth)
+        protected void GL_DrawLineWithWidth(Vector3 start, Vector3 end, float lineWidth)
         {
             Vector3 line = (end - start);
             Vector3 offsetV = (new Vector3(-line.y, line.x, 0)).normalized * lineWidth / 2;
@@ -70,7 +70,7 @@ namespace LogicFlows
             GL.Vertex(translate(end - offsetV));
         }
 
-        protected Vector2 imguiPos(Vector2 screenPos)
+        protected static Vector2 translateToIMGUI(Vector2 screenPos)
         {
             return new Vector2(screenPos.x, Screen.height - screenPos.y);
         }
@@ -82,6 +82,31 @@ namespace LogicFlows
             float y = v1.y <= v2.y ? v1.y : v2.y;
             float ySize = Math.Abs(v1.y - v2.y);
             return new Rect(x, y, xSize, ySize);
+        }
+
+        static Texture2D _halfTransparent = null;
+        internal static Texture2D GetBlackTextureThatWorks()
+        {
+            if (_halfTransparent != null) return _halfTransparent;
+
+            // Create a new Texture2D with the specified width and height
+            Texture2D texture = new Texture2D(2, 2);
+
+            // Set each pixel to half-transparent black
+            Color32[] pixels = new Color32[2 * 2];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = new Color32(0, 0, 0, 255); // 128 represents half-transparent alpha
+            }
+
+            // Set the pixels to the texture
+            texture.SetPixels32(pixels);
+
+            // Apply changes to the texture
+            texture.Apply();
+
+            _halfTransparent = texture;
+            return texture;
         }
     }
 }

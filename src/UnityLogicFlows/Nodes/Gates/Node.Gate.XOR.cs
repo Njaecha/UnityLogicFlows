@@ -26,8 +26,8 @@ namespace LogicFlows
 
             GL.Begin(GL.QUADS);
             GL.Color(symbolColor);
-            drawLineWithWidth(p1 + new Vector2(-3, 0) + parentGraph.A, p1 + new Vector2(y / 6, y / 2) + new Vector2(-3, 0) + parentGraph.A, 3);
-            drawLineWithWidth(p1 + new Vector2(y / 6, y / 2) + new Vector2(-3, 0) + parentGraph.A, p1 + new Vector2(-3, y) + parentGraph.A, 3);
+            GL_DrawLineWithWidth(p1 + new Vector2(-3, 0) + parentGraph.A, p1 + new Vector2(y / 6, y / 2) + new Vector2(-3, 0) + parentGraph.A, 3);
+            GL_DrawLineWithWidth(p1 + new Vector2(y / 6, y / 2) + new Vector2(-3, 0) + parentGraph.A, p1 + new Vector2(-3, y) + parentGraph.A, 3);
             GL.End();
         }
 

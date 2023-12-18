@@ -6,6 +6,7 @@ namespace LogicFlows
     {
         protected override Rect initRect()
         {
+            if (LogicFlows.SmallUI) return new Rect(25, 25, 20, 10);
             return new Rect(50, 50, 40, 20);
         }
 

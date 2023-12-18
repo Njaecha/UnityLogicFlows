@@ -6,6 +6,8 @@ namespace LogicFlows
 {
     public class LogicFlows : MonoBehaviour
     {
+        public static bool SmallUI { get => Screen.height <= 1440 ? true : false; }
+
         public const string version = "0.0.1";
 
         private Dictionary<string, LogicFlowGraph> graphs = new Dictionary<string, LogicFlowGraph>();

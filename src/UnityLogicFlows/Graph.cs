@@ -118,8 +118,8 @@ namespace LogicFlows
         /// </summary>
         public void update()
         {
-            Rect headerRect = new Rect(B.x, B.y + 10, rect.width, 25);
-            Rect eatInputArea = new Rect(A.x - 10, A.y - 10, rect.width + 20, rect.height + 50);
+            Rect headerRect = new Rect(B.x, B.y + (LogicFlows.SmallUI ? 5 : 10), rect.width, LogicFlows.SmallUI ? 13 : 25);
+            Rect eatInputArea = new Rect(A.x - (LogicFlows.SmallUI ? 5 : 10), A.y - (LogicFlows.SmallUI ? 5 : 10), rect.width + (LogicFlows.SmallUI ? 10 : 20), rect.height + (LogicFlows.SmallUI ? 25 : 50));
 
             bool mouseOverHeader = headerRect.Contains(Input.mousePosition);
             mouseOver = rect.Contains(Input.mousePosition);
@@ -134,13 +134,6 @@ namespace LogicFlows
 
             Event current = Event.current;
 
-            if (mouseOverHeader
-                && (current.type == EventType.MouseDown || current.type == EventType.MouseDrag)
-                && current.button == 0)
-            {
-                if (!delta.HasValue) delta = (Vector2)Input.mousePosition - rect.position;
-                draggingWindow = true;
-            }
 
             if (draggingWindow)
             {
@@ -148,7 +141,6 @@ namespace LogicFlows
                 Vector2 m = (Vector2)Input.mousePosition - delta.Value;
                 rect = new Rect(m, rect.size);
             }
-
 
             bool hoveringAny = false;
             foreach (LogicFlowNode node in nodes.Values.Reverse())
@@ -160,11 +152,11 @@ namespace LogicFlows
                 {
                     dragConnectionSourceIndex = node.index;
                 }
-                if (dragConnectionSourceIndex.HasValue && node.inputHoverIndex != -1 && node.index != dragConnectionSourceIndex && !getNodeAt(dragConnectionSourceIndex.Value).getInputTree().Contains(node.index))
+                if (dragConnectionSourceIndex.HasValue && node.inputHovered.HasValue && node.index != dragConnectionSourceIndex && !getNodeAt(dragConnectionSourceIndex.Value).getInputTree().Contains(node.index))
                 {
                     if (current.type == EventType.MouseUp)
                     {
-                        node.setInput(dragConnectionSourceIndex.Value);
+                        node.SetInput(dragConnectionSourceIndex.Value);
                     }
                     hoveringAny = true;
                 }
@@ -231,7 +223,10 @@ namespace LogicFlows
                 selectionStart = null;
             }
 
-            if ((new Rect(D.x - 10, D.y - 10, 20, 20).Contains(Input.mousePosition)))
+            if (new Rect(D.x - 10, D.y - 10, 20, 20).Contains(Input.mousePosition)
+                && !anyNodeHovered
+                && !selectionStart.HasValue
+                && !dragConnectionSourceIndex.HasValue)
             {
                 hoverExpand = true;
                 if (current.type == EventType.MouseDrag && current.button == 0) draggingExpand = true;
@@ -241,6 +236,16 @@ namespace LogicFlows
             if (draggingExpand)
             {
                 rect = new Rect(new Vector2(B.x, Input.mousePosition.y), new Vector2(Input.mousePosition.x - B.x, B.y - Input.mousePosition.y));
+            }
+
+            // drag window around
+            if (mouseOverHeader
+                && (current.type == EventType.MouseDown || current.type == EventType.MouseDrag)
+                && current.button == 0
+                && !anyNodeHovered)
+            {
+                if (!delta.HasValue) delta = (Vector2)Input.mousePosition - rect.position;
+                draggingWindow = true;
             }
         }
 
@@ -253,19 +258,19 @@ namespace LogicFlows
             // draw header
             GL.Begin(GL.QUADS);
             GL.Color(headerColor);
-            GL.Vertex(translate(B + new Vector2(0, 10)));
-            GL.Vertex(translate(B + new Vector2(0, 35)));
-            GL.Vertex(translate(C + new Vector2(0, 35)));
-            GL.Vertex(translate(C + new Vector2(0, 10)));
+            GL.Vertex(translateToGL(B + new Vector2(0, 10) * (LogicFlows.SmallUI ? 0.5f : 1f)));
+            GL.Vertex(translateToGL(B + new Vector2(0, 35) * (LogicFlows.SmallUI ? 0.5f : 1f)));
+            GL.Vertex(translateToGL(C + new Vector2(0, 35) * (LogicFlows.SmallUI ? 0.5f : 1f)));
+            GL.Vertex(translateToGL(C + new Vector2(0, 10) * (LogicFlows.SmallUI ? 0.5f : 1f)));
             GL.End();
 
             // draw background
             GL.Begin(GL.QUADS);
             GL.Color(backgroundColor);
-            GL.Vertex(translate(A));
-            GL.Vertex(translate(B));
-            GL.Vertex(translate(C));
-            GL.Vertex(translate(D));
+            GL.Vertex(translateToGL(A));
+            GL.Vertex(translateToGL(B));
+            GL.Vertex(translateToGL(C));
+            GL.Vertex(translateToGL(D));
             GL.End();
 
             foreach (LogicFlowNode node in nodes.Values)
@@ -277,7 +282,7 @@ namespace LogicFlows
             {
                 GL.Begin(GL.QUADS);
                 GL.Color(anyInputHovered ? LogicFlowNode.connectorHoverColor : LogicFlowNode.lineColor);
-                drawLineWithWidth(getNodeAt(dragConnectionSourceIndex.Value).outputScreenPos + A, Input.mousePosition, 2);
+                GL_DrawLineWithWidth(getNodeAt(dragConnectionSourceIndex.Value).outputScreenPos + A, Input.mousePosition, 2);
                 GL.End();
             }
 
@@ -289,10 +294,10 @@ namespace LogicFlows
                 Vector2 v4 = new Vector2(Input.mousePosition.x, selectionStart.Value.y);
                 GL.Begin(GL.QUADS);
                 GL.Color(selectionColor);
-                drawLineWithWidth(v1, v2, 3);
-                drawLineWithWidth(v2, v3, 3);
-                drawLineWithWidth(v3, v4, 3);
-                drawLineWithWidth(v4, v1, 3);
+                GL_DrawLineWithWidth(v1, v2, 3);
+                GL_DrawLineWithWidth(v2, v3, 3);
+                GL_DrawLineWithWidth(v3, v4, 3);
+                GL_DrawLineWithWidth(v4, v1, 3);
                 GL.End();
             }
 
@@ -300,10 +305,10 @@ namespace LogicFlows
             {
                 GL.Begin(GL.TRIANGLE_STRIP);
                 GL.Color(headerColor);
-                GL.Vertex(translate(D + new Vector2(-10, 0)));
-                GL.Vertex(translate(D + new Vector2(10, -10)));
-                GL.Vertex(translate(D));
-                GL.Vertex(translate(D + new Vector2(0, 10)));
+                GL.Vertex(translateToGL(D + new Vector2(-10, 0)));
+                GL.Vertex(translateToGL(D + new Vector2(10, -10)));
+                GL.Vertex(translateToGL(D));
+                GL.Vertex(translateToGL(D + new Vector2(0, 10)));
                 GL.End();
             }
 
@@ -311,7 +316,7 @@ namespace LogicFlows
 
         protected override Rect initRect()
         {
-            return new Rect(200, 200, 600, 300);
+            return new Rect(new Vector2(10,10), new Vector2(600,300) * (LogicFlows.SmallUI ? 0.5f : 1f));
         }
     }
 }
