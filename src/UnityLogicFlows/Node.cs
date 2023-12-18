@@ -97,7 +97,7 @@ namespace LogicFlows
             labelStyle.normal.textColor = Color.black;
             if (LogicFlows.UIScale < 1f)
             {
-                labelStyle.fontSize *= (int)LogicFlows.UIScale;
+                labelStyle.fontSize = (int)(labelStyle.fontSize * LogicFlows.UIScale);
                 labelStyle.normal.textColor = Color.white;
                 labelStyle.padding.top = 0;
                 labelStyle.padding.bottom = 0;
