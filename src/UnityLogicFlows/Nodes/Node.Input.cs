@@ -31,10 +31,10 @@ namespace LogicFlows
         {
             GL.Begin(GL.QUADS);
             GL.Color(enabled ? getValue() ? trueColor : falseColor : disabledColor);
-            GL.Vertex(translate(rect.center + new Vector2(-10, -10) * LogicFlows.UIScale));
-            GL.Vertex(translate(rect.center + new Vector2(-10, 10) * LogicFlows.UIScale));
-            GL.Vertex(translate(rect.center + new Vector2(10, 10) * LogicFlows.UIScale));
-            GL.Vertex(translate(rect.center + new Vector2(10, -10) * LogicFlows.UIScale));
+            GL.Vertex(translateToGL(rect.center + new Vector2(-10, -10) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL(rect.center + new Vector2(-10, 10) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL(rect.center + new Vector2(10, 10) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL(rect.center + new Vector2(10, -10) * parentGraph.getUIScale()));
             GL.End();
         }
     }

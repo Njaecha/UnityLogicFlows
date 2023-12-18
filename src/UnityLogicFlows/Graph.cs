@@ -36,13 +36,23 @@ namespace LogicFlows
 
         public LogicFlowGraph(Rect rect)
         {
-            this.rect = rect;
+            this.setBackingRect(rect);
         }
 
         public LogicFlowNode getNodeAt(int key)
         {
             if (!nodes.ContainsKey(key)) return null;
             return nodes[key];
+        }
+
+        public void setUIScaleModifier(float modifier)
+        {
+            UIScaleModifier = modifier;
+        }
+
+        public float getUIScale()
+        {
+            return UIScale;
         }
 
         /// <summary>
@@ -118,8 +128,8 @@ namespace LogicFlows
         /// </summary>
         public void update()
         {
-            Rect headerRect = new Rect(B.x, B.y + (LogicFlows.UIScale * 10), rect.width, LogicFlows.UIScale * 25);
-            Rect eatInputArea = new Rect(A.x - (LogicFlows.UIScale * 10), A.y - (LogicFlows.UIScale * 10), rect.width + (LogicFlows.UIScale * 20), rect.height + (LogicFlows.UIScale * 50));
+            Rect headerRect = new Rect(B.x, B.y + (UIScale * 10), rect.width, UIScale * 25);
+            Rect eatInputArea = new Rect(A.x - (UIScale * 10), A.y - (UIScale * 10), rect.width + (UIScale * 20), rect.height + (UIScale * 50));
 
             bool mouseOverHeader = headerRect.Contains(Input.mousePosition);
             mouseOver = rect.Contains(Input.mousePosition);
@@ -139,7 +149,7 @@ namespace LogicFlows
             {
                 if (!delta.HasValue) return;
                 Vector2 m = (Vector2)Input.mousePosition - delta.Value;
-                rect = new Rect(m, rect.size);
+                setPositionUI(m);
             }
 
             bool hoveringAny = false;
@@ -174,6 +184,24 @@ namespace LogicFlows
                 && !anyNodeHovered
                 ) selectedNodes.Clear();
 
+            // dragging expand
+            if (new Rect(D.x - 10, D.y - 10, 20, 20).Contains(Input.mousePosition)
+                && !anyNodeHovered
+                && !selectionStart.HasValue
+                && !dragConnectionSourceIndex.HasValue
+                && !selectionStart.HasValue)
+            {
+                hoverExpand = true;
+                if (current.type == EventType.MouseDrag && current.button == 0) draggingExpand = true;
+            }
+            else hoverExpand = false;
+
+            if (draggingExpand)
+            {
+                setSizeUI(new Vector2(Input.mousePosition.x - B.x, B.y - Input.mousePosition.y));
+                setPositionUI(new Vector2(B.x, Input.mousePosition.y));
+            }
+
             //selection
             if (current.type == EventType.MouseDown)
             {
@@ -189,7 +217,12 @@ namespace LogicFlows
                     }
                 }
             }
-            if (!LogicFlowNode.draggingAnyNode && current.button == 0 && !mouseOverHeader && !draggingWindow && !dragConnectionSourceIndex.HasValue)
+            if (!LogicFlowNode.draggingAnyNode
+                && current.button == 0
+                && !mouseOverHeader
+                && !draggingWindow
+                && !dragConnectionSourceIndex.HasValue
+                && !draggingExpand)
             {
                 if (!selectionStart.HasValue 
                     && (current.type == EventType.MouseDown || current.type == EventType.MouseDrag) 
@@ -213,30 +246,6 @@ namespace LogicFlows
             }
 
 
-            // reset stuff on mouseUP
-            if (current.type == EventType.MouseUp)
-            {
-                draggingWindow = false;
-                dragConnectionSourceIndex = null;
-                delta = null;
-                draggingExpand = false;
-                selectionStart = null;
-            }
-
-            if (new Rect(D.x - 10, D.y - 10, 20, 20).Contains(Input.mousePosition)
-                && !anyNodeHovered
-                && !selectionStart.HasValue
-                && !dragConnectionSourceIndex.HasValue)
-            {
-                hoverExpand = true;
-                if (current.type == EventType.MouseDrag && current.button == 0) draggingExpand = true;
-            }
-            else hoverExpand = false;
-
-            if (draggingExpand)
-            {
-                rect = new Rect(new Vector2(B.x, Input.mousePosition.y), new Vector2(Input.mousePosition.x - B.x, B.y - Input.mousePosition.y));
-            }
 
             // drag window around
             if (mouseOverHeader
@@ -246,6 +255,16 @@ namespace LogicFlows
             {
                 if (!delta.HasValue) delta = (Vector2)Input.mousePosition - rect.position;
                 draggingWindow = true;
+            }
+
+            // reset stuff on mouseUP
+            if (current.type == EventType.MouseUp)
+            {
+                draggingWindow = false;
+                dragConnectionSourceIndex = null;
+                delta = null;
+                draggingExpand = false;
+                selectionStart = null;
             }
         }
 
@@ -258,10 +277,10 @@ namespace LogicFlows
             // draw header
             GL.Begin(GL.QUADS);
             GL.Color(headerColor);
-            GL.Vertex(translateToGL(B + new Vector2(0, 10) * LogicFlows.UIScale));
-            GL.Vertex(translateToGL(B + new Vector2(0, 35) * LogicFlows.UIScale));
-            GL.Vertex(translateToGL(C + new Vector2(0, 35) * LogicFlows.UIScale));
-            GL.Vertex(translateToGL(C + new Vector2(0, 10) * LogicFlows.UIScale));
+            GL.Vertex(translateToGL(B + new Vector2(0, 10) * UIScale));
+            GL.Vertex(translateToGL(B + new Vector2(0, 35) * UIScale));
+            GL.Vertex(translateToGL(C + new Vector2(0, 35) * UIScale));
+            GL.Vertex(translateToGL(C + new Vector2(0, 10) * UIScale));
             GL.End();
 
             // draw background
@@ -316,7 +335,7 @@ namespace LogicFlows
 
         protected override Rect initRect()
         {
-            return new Rect(new Vector2(10,10), new Vector2(600,300) * LogicFlows.UIScale);
+            return new Rect(new Vector2(10,10), new Vector2(600,300) * UIScale);
         }
     }
 }

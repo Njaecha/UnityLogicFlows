@@ -6,8 +6,6 @@ namespace LogicFlows
 {
     public class LogicFlows : MonoBehaviour
     {
-        public static float UIScale { get => 2160 / Screen.height; }
-
         public const string version = "0.0.1";
 
         private Dictionary<string, LogicFlowGraph> graphs = new Dictionary<string, LogicFlowGraph>();

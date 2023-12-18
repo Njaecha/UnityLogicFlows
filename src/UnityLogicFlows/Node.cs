@@ -59,7 +59,7 @@ namespace LogicFlows
 
         protected bool hasOutput = true;
 
-        internal Vector2 outputScreenPos { get => D + (C - D) / 2 + new Vector2(LogicFlows.UIScale * 10, 0); }
+        internal Vector2 outputScreenPos { get => D + (C - D) / 2 + new Vector2(parentGraph.getUIScale() * 10, 0); }
 
         public bool enabled { get; set; } = true;
 
@@ -93,21 +93,13 @@ namespace LogicFlows
             tooltipStyle.normal.textColor = Color.yellow;
 
             GUIStyle labelStyle = new GUIStyle(GUI.skin.box);
-            labelStyle.alignment = TextAnchor.MiddleLeft;
+            labelStyle.alignment = TextAnchor.MiddleCenter;
+            labelStyle.fontSize = (int)(14f * parentGraph.getUIScale());
             labelStyle.normal.textColor = Color.black;
-            if (LogicFlows.UIScale < 1f)
-            {
-                labelStyle.fontSize = (int)(labelStyle.fontSize * LogicFlows.UIScale);
-                labelStyle.normal.textColor = Color.white;
-                labelStyle.padding.top = 0;
-                labelStyle.padding.bottom = 0;
-                labelStyle.padding.left = 0; 
-                labelStyle.padding.right = 0;
-                // TODO: make better labelbackground
-                labelStyle.normal.background = GetBlackTextureThatWorks();
-            }
+            labelStyle.padding.top = labelStyle.padding.bottom = labelStyle.padding.left = labelStyle.padding.right = 0;
+            labelStyle.normal.background = GetBackground();
 
-            if (!string.IsNullOrEmpty(label)) GUI.Label(new Rect(parentGraph.A.x + B.x, Screen.height - (parentGraph.A.y + B.y) - (LogicFlows.UIScale * 25), C.x - B.x, LogicFlows.UIScale * 20), label, labelStyle);
+            if (!string.IsNullOrEmpty(label)) GUI.Label(new Rect(parentGraph.A.x + B.x, Screen.height - (parentGraph.A.y + B.y) - (parentGraph.getUIScale() * 25), C.x - B.x, parentGraph.getUIScale() * 20), label, labelStyle);
             if (mouseOver && !string.IsNullOrEmpty(toolTipText))
             {
                 Vector2 mouse = translateToIMGUI(Input.mousePosition);
@@ -148,7 +140,7 @@ namespace LogicFlows
             {
                 if (!delta.HasValue) return;
                 Vector2 m = ((Vector2)Input.mousePosition - parentGraph.A) - delta.Value;
-                base.rect = new Rect(m, rect.size);
+                setPositionUI(m);
             }
 
             if (deletable && parentGraph.selectedNodes.Contains(index) && current.keyCode == KeyCode.Delete && current.type == EventType.KeyDown)
@@ -171,7 +163,7 @@ namespace LogicFlows
             bool hoveringAnyInput = false;
             for (int i = 0; i < inputs.Length; i++)
             {
-                Rect inputHoverRect = new Rect(parentGraph.A + getInputPoint(i) + new Vector2(LogicFlows.UIScale * -15, LogicFlows.UIScale * -10), new Vector2(LogicFlows.UIScale * 15, LogicFlows.UIScale * 20));
+                Rect inputHoverRect = new Rect(parentGraph.A + getInputPoint(i) + new Vector2(parentGraph.getUIScale() * -15, parentGraph.getUIScale() * -10), new Vector2(parentGraph.getUIScale() * 15, parentGraph.getUIScale() * 20));
                 if (inputHoverRect.Contains(Input.mousePosition))
                 {
                     inputHovered = i;
@@ -188,7 +180,7 @@ namespace LogicFlows
         protected void handleOutput()
         {
             // Output
-            Rect outputRect = new Rect(parentGraph.A + D + (C - D) / 2 + new Vector2(0, LogicFlows.UIScale * -10), new Vector2(LogicFlows.UIScale * 15, LogicFlows.UIScale * 20));
+            Rect outputRect = new Rect(parentGraph.A + D + (C - D) / 2 + new Vector2(0, parentGraph.getUIScale() * -10), new Vector2(parentGraph.getUIScale() * 15, parentGraph.getUIScale() * 20));
             if (outputRect.Contains(Input.mousePosition))
             {
                 outputHovered = true;
@@ -206,19 +198,19 @@ namespace LogicFlows
             // draw node border
             GL.Begin(GL.QUADS);
             GL.Color(enabled ? inputsValid() ? borderColor : invalidColor : disabledColor);
-            GL.Vertex(translate(A + new Vector2(-2, -2) * LogicFlows.UIScale));
-            GL.Vertex(translate(B + new Vector2(-2, 2) * LogicFlows.UIScale));
-            GL.Vertex(translate(C + new Vector2(2, 2) * LogicFlows.UIScale));
-            GL.Vertex(translate(D + new Vector2(2, -2) * LogicFlows.UIScale));
+            GL.Vertex(translateToGL(A + new Vector2(-2, -2) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL(B + new Vector2(-2, 2) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL(C + new Vector2(2, 2) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL(D + new Vector2(2, -2) * parentGraph.getUIScale()));
             GL.End();
 
             // draw node background
             GL.Begin(GL.QUADS);
             GL.Color(parentGraph.selectedNodes.Contains(index) ? selectedColor : nodeColor);
-            GL.Vertex(translate(A));
-            GL.Vertex(translate(B));
-            GL.Vertex(translate(C));
-            GL.Vertex(translate(D));
+            GL.Vertex(translateToGL(A));
+            GL.Vertex(translateToGL(B));
+            GL.Vertex(translateToGL(C));
+            GL.Vertex(translateToGL(D));
             GL.End();
         }
 
@@ -227,9 +219,9 @@ namespace LogicFlows
             // draw output
             GL.Begin(GL.TRIANGLES);
             GL.Color(outputHovered ? connectorHoverColor : outputColor);
-            GL.Vertex(translate((D + (C - D) / 2) + new Vector2(0, -10) * LogicFlows.UIScale));
-            GL.Vertex(translate((D + (C - D) / 2) + new Vector2(0, 10) * LogicFlows.UIScale));
-            GL.Vertex(translate((D + (C - D) / 2) + new Vector2(15, 0) * LogicFlows.UIScale));
+            GL.Vertex(translateToGL((D + (C - D) / 2) + new Vector2(0, -10) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL((D + (C - D) / 2) + new Vector2(0, 10) * parentGraph.getUIScale()));
+            GL.Vertex(translateToGL((D + (C - D) / 2) + new Vector2(15, 0) * parentGraph.getUIScale()));
             GL.End();
         }
 
@@ -240,9 +232,9 @@ namespace LogicFlows
                 // draw slot
                 GL.Begin(GL.TRIANGLES);
                 GL.Color(inputHovered.HasValue && inputHovered.Value == i && parentGraph.anyInputHovered ? connectorHoverColor : inputColor);
-                GL.Vertex(translate(getInputPoint(i) + new Vector2(-15, 0) * LogicFlows.UIScale));
-                GL.Vertex(translate(getInputPoint(i) + new Vector2(0, 10) * LogicFlows.UIScale));
-                GL.Vertex(translate(getInputPoint(i) + new Vector2(0, -10) * LogicFlows.UIScale));
+                GL.Vertex(translateToGL(getInputPoint(i) + new Vector2(-15, 0) * parentGraph.getUIScale()));
+                GL.Vertex(translateToGL(getInputPoint(i) + new Vector2(0, 10) * parentGraph.getUIScale()));
+                GL.Vertex(translateToGL(getInputPoint(i) + new Vector2(0, -10) * parentGraph.getUIScale()));
                 GL.End();
 
                 // draw line
@@ -251,7 +243,7 @@ namespace LogicFlows
                     LogicFlowNode input = inputAt(i);
                     GL.Begin(GL.QUADS);
                     GL.Color(input.getValue() ? trueColor : falseColor);
-                    GL_DrawLineWithWidth(input.outputScreenPos + parentGraph.A, getInputPoint(i) + new Vector2(LogicFlows.UIScale * -10, 0) + parentGraph.A, 2);
+                    GL_DrawLineWithWidth(input.outputScreenPos + parentGraph.A, getInputPoint(i) + new Vector2(parentGraph.getUIScale() * -10, 0) + parentGraph.A, 2);
                     GL.End();
                 }
             }
@@ -265,9 +257,9 @@ namespace LogicFlows
 
         protected abstract bool inputsValid();
 
-        new protected Vector3 translate(Vector3 s)
+        new protected Vector3 translateToGL(Vector3 s)
         {
-            return LogicFlowBox.translate(s + (Vector3)parentGraph.A);
+            return LogicFlowBox.translateToGL(s + (Vector3)parentGraph.A);
         }
 
         internal void getInputTreeNodes(ref List<int> indexCollection)

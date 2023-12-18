@@ -16,19 +16,19 @@ namespace LogicFlows
 
             GL.Begin(GL.TRIANGLE_STRIP);
             GL.Color(enabled ? getValue() ? trueColor : falseColor : disabledColor);
-            GL.Vertex(translate(p1));
-            GL.Vertex(translate(p1 + new Vector2(y, 0)));
-            GL.Vertex(translate(p1 + new Vector2(y / 6, y / 2)));
-            GL.Vertex(translate(p1 + new Vector2(y * 1.5f, y / 2)));
-            GL.Vertex(translate(p1 + new Vector2(0, y)));
-            GL.Vertex(translate(p1 + new Vector2(y, y)));
+            GL.Vertex(translateToGL(p1));
+            GL.Vertex(translateToGL(p1 + new Vector2(y, 0)));
+            GL.Vertex(translateToGL(p1 + new Vector2(y / 6, y / 2)));
+            GL.Vertex(translateToGL(p1 + new Vector2(y * 1.5f, y / 2)));
+            GL.Vertex(translateToGL(p1 + new Vector2(0, y)));
+            GL.Vertex(translateToGL(p1 + new Vector2(y, y)));
             GL.End();
         }
 
         protected override void clone()
         {
             var newNode = new LogicFlowNode_OR(this.parentGraph) { label = this.label, toolTipText = this.toolTipText };
-            newNode.setPosition(this.rect.position + new Vector2(20, 20));
+            newNode.setPositionUI(this.rect.position + new Vector2(20, 20));
         }
 
         public override bool getValue()
