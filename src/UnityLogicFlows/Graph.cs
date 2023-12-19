@@ -124,6 +124,55 @@ namespace LogicFlows
         }
 
         /// <summary>
+        /// Selects all nodes in the node tree of a node, or all trees of all selected nodes
+        /// </summary>
+        /// <param name="treeRoot"></param>
+        public void selectTree(int? treeRoot = null)
+        {
+            List<int> roots = new List<int>();
+            if (treeRoot.HasValue) roots.Add(treeRoot.Value);
+            else roots = selectedNodes;
+            if (roots.Count > 0)
+            {
+                List<int> newSelects = new List<int>();
+                foreach(int index in roots)
+                {
+                    if (!newSelects.Contains(index))
+                    {
+                        newSelects.AddRange(getNodeAt(index).getInputTree().Where(i => !newSelects.Contains(i)));
+                    }
+                }
+                roots.AddRange(newSelects);
+                selectedNodes = roots;
+            }
+        }
+
+        /// <summary>
+        /// Selects all nodes in the nodenetwork of a node, or all networks of all selected nodes
+        /// Network does not expand through input nodes.
+        /// </summary>
+        /// <param name="networkStart"></param>
+        public void selectNetwork(int? networkStart = null)
+        {
+            List<int> roots = new List<int>();
+            if (networkStart.HasValue) roots.Add(networkStart.Value);
+            else roots = selectedNodes;
+            if (roots.Count > 0)
+            {
+                List<int> newSelects = new List<int>();
+                foreach(int index in roots)
+                {
+                    if (!newSelects.Contains(index))
+                    {
+                        newSelects.AddRange(getNodeAt(index).getNodeNetwork().Where(i => !newSelects.Contains(i)));
+                    }
+                }
+                roots.AddRange(newSelects);
+                selectedNodes = roots;
+            }
+        }
+
+        /// <summary>
         /// should be called from withing Update() whenever the flow is displaying its UI
         /// </summary>
         public void update()

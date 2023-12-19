@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace LogicFlows
 {
@@ -279,6 +280,25 @@ namespace LogicFlows
             List<int> l = new List<int>();
             getInputTreeNodes(ref l);
             return l;
+        }
+
+        public List<int> getNodeNetwork()
+        {
+            List<int> coreTree = this.getInputTree().Where(i => parentGraph.getNodeAt(i) is not LogicFlowInput).ToList();
+            List<int> otherNodes = parentGraph.getAllNodes().Where(n => n is not LogicFlowInput).Select(n => n.index).Where(i => !coreTree.Contains(i)).ToList();
+            List<int> network = new List<int>(coreTree);
+            foreach(int index in otherNodes)
+            {
+                if (!network.Contains(index))
+                {
+                    List<int> otherTree = parentGraph.getNodeAt(index).getInputTree();
+                    if (network.Intersect(otherTree).ToList().Count > 0)
+                    {
+                        network.AddRange(otherTree.Where(i => parentGraph.getNodeAt(i) is not LogicFlowInput).ToList());
+                    }
+                }
+            }
+            return network;
         }
     }
 
