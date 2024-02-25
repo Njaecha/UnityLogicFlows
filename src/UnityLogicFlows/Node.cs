@@ -87,12 +87,8 @@ namespace LogicFlows
             inputs[i.Value] = sourceIndex;
         }
 
-        internal void ongui()
+        internal void drawLabel()
         {
-            GUIStyle tooltipStyle = new GUIStyle(GUI.skin.box);
-            tooltipStyle.alignment = TextAnchor.MiddleCenter;
-            tooltipStyle.normal.textColor = Color.yellow;
-
             GUIStyle labelStyle = new GUIStyle(GUI.skin.box);
             labelStyle.alignment = TextAnchor.MiddleCenter;
             labelStyle.fontSize = (int)(14f * parentGraph.getUIScale());
@@ -101,6 +97,14 @@ namespace LogicFlows
             labelStyle.normal.background = GetBackground();
 
             if (!string.IsNullOrEmpty(label)) GUI.Label(new Rect(parentGraph.A.x + B.x, Screen.height - (parentGraph.A.y + B.y) - (parentGraph.getUIScale() * 25), C.x - B.x, parentGraph.getUIScale() * 20), label, labelStyle);
+        }
+
+        internal void drawTooltip()
+        {
+            GUIStyle tooltipStyle = new GUIStyle(GUI.skin.box);
+            tooltipStyle.alignment = TextAnchor.MiddleCenter;
+            tooltipStyle.normal.textColor = Color.yellow;
+
             if (mouseOver && !string.IsNullOrEmpty(toolTipText))
             {
                 Vector2 mouse = translateToIMGUI(Input.mousePosition);
@@ -144,13 +148,13 @@ namespace LogicFlows
                 setPositionUI(m);
             }
 
-            if (deletable && parentGraph.selectedNodes.Contains(index) && current.keyCode == KeyCode.Delete && current.type == EventType.KeyDown)
+            if (deletable && parentGraph.selectedNodes.Contains(index) && current.keyCode == parentGraph.KeyNodeDelete && current.type == EventType.KeyDown)
             {
                 nodeDeletedEvent?.Invoke(this, new NodeDeletedEventArgs() { index = index, parentGraph = parentGraph });
                 parentGraph.RemoveNode(index);
             }
 
-            if (current.keyCode == KeyCode.D && current.modifiers == EventModifiers.Alt && current.type == EventType.KeyDown && parentGraph.selectedNodes.Contains(index))
+            if (current.keyCode == parentGraph.KeyNodeDisable && current.modifiers == EventModifiers.Alt && current.type == EventType.KeyDown && parentGraph.selectedNodes.Contains(index))
             {
                 enabled = !enabled;
             }
@@ -172,6 +176,11 @@ namespace LogicFlows
                     if (current.type == EventType.MouseDown && current.button == 1 && inputAt(i) != null)
                     {
                         inputs[i] = null; // remove input connection by right clicking it
+                    }
+                    if (current.type == EventType.MouseDrag && current.button == 0 && inputAt(i) != null)
+                    {
+                        parentGraph.dragConnectionSourceIndex = inputAt(i).index;
+                        inputs[i] = null;
                     }
                 }
             }
@@ -275,6 +284,10 @@ namespace LogicFlows
             }
         }
 
+        /// <summary>
+        /// Gets a "Tree" of all relevant downstream nodes. Does not include its called on.
+        /// </summary>
+        /// <returns></returns>
         public List<int> getInputTree()
         {
             List<int> l = new List<int>();
@@ -284,8 +297,9 @@ namespace LogicFlows
 
         public List<int> getNodeNetwork()
         {
-            List<int> coreTree = this.getInputTree().Where(i => parentGraph.getNodeAt(i) is not LogicFlowInput).ToList();
-            List<int> otherNodes = parentGraph.getAllNodes().Where(n => n is not LogicFlowInput).Select(n => n.index).Where(i => !coreTree.Contains(i)).ToList();
+            List<int> coreTree = this.getInputTree().Where(i => !(parentGraph.getNodeAt(i) is  LogicFlowInput)).ToList();
+            coreTree.Add(index);
+            List<int> otherNodes = parentGraph.getAllNodes().Where(n => !(n is LogicFlowInput)).Select(n => n.index).Where(i => !coreTree.Contains(i)).ToList();
             List<int> network = new List<int>(coreTree);
             foreach(int index in otherNodes)
             {
@@ -294,7 +308,7 @@ namespace LogicFlows
                     List<int> otherTree = parentGraph.getNodeAt(index).getInputTree();
                     if (network.Intersect(otherTree).ToList().Count > 0)
                     {
-                        network.AddRange(otherTree.Where(i => parentGraph.getNodeAt(i) is not LogicFlowInput).ToList());
+                        network.Add(index); // this node must be part of the network because its tree and the root tree intersect
                     }
                 }
             }

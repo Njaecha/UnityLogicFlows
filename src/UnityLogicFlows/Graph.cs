@@ -7,6 +7,12 @@ namespace LogicFlows
 {
     public class LogicFlowGraph : LogicFlowBox
     {
+        public KeyCode KeySelectTree { get; set; } = KeyCode.T;
+        public KeyCode KeySelectNetwork { get; set; } = KeyCode.N;
+        public KeyCode KeyNodeDisable { get; set; } = KeyCode.D;
+        public KeyCode KeyNodeDelete { get; set; } = KeyCode.Delete;
+
+
         private Dictionary<int, LogicFlowNode> nodes = new Dictionary<int, LogicFlowNode>();
 
         public static Color backgroundColor = Color.white;
@@ -117,7 +123,13 @@ namespace LogicFlows
         {
             foreach (LogicFlowNode node in nodes.Values)
             {
-                if (node != null) node.ongui();
+                if (node != null) node.drawLabel();
+            }
+
+            // draw tooltip after drawing all the labes otherwise the tooltip will be hidden by the lables of nodes later in the list
+            foreach (LogicFlowNode node in nodes.Values)
+            {
+                if (node != null) node.drawTooltip();
             }
 
             if (eatingInput) Input.ResetInputAxes();
@@ -173,7 +185,7 @@ namespace LogicFlows
         }
 
         /// <summary>
-        /// should be called from withing Update() whenever the flow is displaying its UI
+        /// should be called from within Update() whenever the flow is displaying its UI
         /// </summary>
         public void update()
         {
@@ -201,6 +213,7 @@ namespace LogicFlows
                 setPositionUI(m);
             }
 
+            // drag connection
             bool hoveringAny = false;
             foreach (LogicFlowNode node in nodes.Values.Reverse())
             {
@@ -223,15 +236,6 @@ namespace LogicFlows
             if (hoveringAny) anyInputHovered = true;
             else anyInputHovered = false;
 
-            if (current.modifiers != EventModifiers.Shift
-                && current.button == 0
-                && current.type == EventType.MouseDown
-                && mouseOver
-                && !mouseOverHeader
-                && !draggingWindow
-                && !dragConnectionSourceIndex.HasValue
-                && !anyNodeHovered
-                ) selectedNodes.Clear();
 
             // dragging expand
             if (new Rect(D.x - 10, D.y - 10, 20, 20).Contains(Input.mousePosition)
@@ -251,6 +255,17 @@ namespace LogicFlows
                 setPositionUI(new Vector2(B.x, Input.mousePosition.y));
             }
 
+            // clear selection
+            if (current.modifiers != EventModifiers.Shift
+                && current.button == 0
+                && current.type == EventType.MouseDown
+                && mouseOver
+                && !mouseOverHeader
+                && !draggingWindow
+                && !dragConnectionSourceIndex.HasValue
+                && !anyNodeHovered
+                ) selectedNodes.Clear();
+
             //selection
             if (current.type == EventType.MouseDown)
             {
@@ -266,6 +281,7 @@ namespace LogicFlows
                     }
                 }
             }
+            if (dragConnectionSourceIndex.HasValue) selectionStart = null;
             if (!LogicFlowNode.draggingAnyNode
                 && current.button == 0
                 && !mouseOverHeader
@@ -294,6 +310,15 @@ namespace LogicFlows
                 }
             }
 
+            // autoselector
+            if (mouseOver && current.keyCode == KeySelectTree && current.modifiers == EventModifiers.Control && current.type == EventType.KeyDown)
+            {
+                selectTree();
+            }
+            if (mouseOver && current.keyCode == KeySelectNetwork && current.modifiers == EventModifiers.Control && current.type == EventType.KeyDown)
+            {
+                selectNetwork();
+            }
 
 
             // drag window around
