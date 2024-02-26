@@ -96,6 +96,6 @@
   <Import Project="..\packages\IllusionLibs.KoikatsuSunshine.UnityEngine.TextRenderingModule.2019.4.9\build\IllusionLibs.KoikatsuSunshine.UnityEngine.TextRenderingModule.targets" Condition="Exists('..\packages\IllusionLibs.KoikatsuSunshine.UnityEngine.TextRenderingModule.2019.4.9\build\IllusionLibs.KoikatsuSunshine.UnityEngine.TextRenderingModule.targets')" />
   <Import Project="..\packages\IllusionLibs.KoikatsuSunshine.UniRx.2021.9.17\build\IllusionLibs.KoikatsuSunshine.UniRx.targets" Condition="Exists('..\packages\IllusionLibs.KoikatsuSunshine.UniRx.2021.9.17\build\IllusionLibs.KoikatsuSunshine.UniRx.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "E:\Niko\Modding\Illusion Games Modding and Shit\BepInEx Plugin dev\_Libs_KKS\New.UnityLogicFlows.dll"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "E:\Niko\Modding\Illusion Games Modding and Shit\BepInEx Plugin dev\ANAL\src\AmazingNewAccessoryLogic\packages\New.UnityLogicFlows.dll"</PostBuildEvent>
   </PropertyGroup>
 </Project>

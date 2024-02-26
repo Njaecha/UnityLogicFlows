@@ -177,7 +177,12 @@ namespace LogicFlows
                     {
                         inputs[i] = null; // remove input connection by right clicking it
                     }
-                    if (current.type == EventType.MouseDrag && current.button == 0 && inputAt(i) != null)
+                    if (current.type == EventType.MouseDrag 
+                        && current.button == 0 
+                        && inputAt(i) != null 
+                        && !parentGraph.dragConnectionSourceIndex.HasValue 
+                        && !draggingAnyNode 
+                        && !parentGraph.selectionStart.HasValue)
                     {
                         parentGraph.dragConnectionSourceIndex = inputAt(i).index;
                         inputs[i] = null;
